@@ -2,7 +2,7 @@
 
 ## Information
 
-This is a sample Blazor web application using the [Silicon CSS framework](https://silicon-css.com/) by [tygzy](https://github.com/tygzy/).
+This is a simple Blazor web application using the [Silicon CSS framework](https://silicon-css.com/) by [tygzy](https://github.com/tygzy/). Its used to generate srv records for minecraft and teamspeak servers.
 
 ## License
 
