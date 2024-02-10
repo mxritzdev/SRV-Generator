@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "ltrpQV5Kvnar1nd2Gp/3kVoQwWFjb2kxD/fXUhseaYvJ9mOGi59CL9xj+jSjs1LFZKgU0aNP6scE5wCZutAr8A==",
+  "dgSpecHash": "atUXJa3kI/0hUib/s4shqPBpPstRmTbYqm4n47UjWX9Z5iG4PnDIuEsfD0p9/VPwxnTxET8CCrqxDy+E8ccDTw==",
   "success": true,
   "projectFilePath": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRV-Generator\\SRVGenerator\\SRVGenerator.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\morit\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-x64\\6.0.25\\microsoft.netcore.app.runtime.linux-x64.6.0.25.nupkg.sha512",
+    "C:\\Users\\morit\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-x64\\6.0.25\\microsoft.aspnetcore.app.runtime.linux-x64.6.0.25.nupkg.sha512",
+    "C:\\Users\\morit\\.nuget\\packages\\microsoft.netcore.app.crossgen2.win-x64\\6.0.25\\microsoft.netcore.app.crossgen2.win-x64.6.0.25.nupkg.sha512",
+    "C:\\Users\\morit\\.nuget\\packages\\microsoft.netcore.app.host.linux-x64\\6.0.25\\microsoft.netcore.app.host.linux-x64.6.0.25.nupkg.sha512"
+  ],
   "logs": []
 }
