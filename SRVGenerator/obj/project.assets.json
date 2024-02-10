@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRVGenerator\\SRVGenerator\\SRVGenerator.csproj",
+      "projectUniqueName": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRV-Generator\\SRVGenerator\\SRVGenerator.csproj",
       "projectName": "SRVGenerator",
-      "projectPath": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRVGenerator\\SRVGenerator\\SRVGenerator.csproj",
+      "projectPath": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRV-Generator\\SRVGenerator\\SRVGenerator.csproj",
       "packagesPath": "C:\\Users\\morit\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRVGenerator\\SRVGenerator\\obj\\",
+      "outputPath": "C:\\Users\\morit\\Documents\\Coding\\GitHub\\Moritz-Deiaco\\SRV-Generator\\SRVGenerator\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\morit\\AppData\\Roaming\\NuGet\\NuGet.Config"

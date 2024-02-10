@@ -1,0 +1,126 @@
+﻿@page "/"
+@using SRVGenerator.Models
+@inject IJSRuntime JS
+
+<h1>SRV Record Generator</h1>
+<p>made by <a href="https://mxritz.xyz" target="_blank">moritz</a> for <a href="https://endelon.link" target="_blank">endelon</a></p>
+<br/>
+
+@if (!ShowResult){
+    
+    @if (Language == "de")
+    {
+        <p>Du möchtest deinen Minecraft-Server oder Teamspeak-3-Server mit einer Domain verbinden? Folge dieser einfache Anleitung:</p>
+    }
+    else
+    {
+        <p>You want to connect your minecraft server or teamspeak 3 server with a domain? Follow this simple guide:</p>
+    }
+
+    <EditForm Model="Model" OnSubmit="Callback">
+
+        <InputSelect @bind-Value="Model.Type">
+            
+            @if (Language == "de") {
+                <option value="" selected disabled hidden>
+                    Dienst auswählen
+                </option>
+            }
+            else
+            {
+                <option value="" selected disabled hidden>
+                    Choose Service
+                </option>
+            }
+            
+            <option value="" selected disabled hidden>
+                @(Language == "de" ? "Dienst auswählen" : "Choose Service")
+            </option>
+
+            <option value="_minecraft._tcp">Minecraft</option>
+
+            <option value="_ts3._udp">Teamspeak</option>
+
+        </InputSelect>
+
+        <InputText @bind-Value="Model.ServerUrl" placeholder="Server URL: node1.endelon-hosting.de:1234" pattern="(?:\d{1,3}\.){3}\d{1,3}:\d{1,5}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}:\d{1,5}|[^:]+:\d{1,5}"></InputText>
+
+        @if (Language == "de") {
+            <input type="submit" value="Absenden">
+        }
+        else
+        {
+            <input type="submit" value="Submit">
+        }
+    </EditForm>
+}
+else
+{
+
+    if (Language == "de")
+    {
+        
+    
+        <p>- Ändere den Record-Typ von <code>A</code> zu <code>SRV</code>.</p>
+        <p>- Ändere den Record-Name zu <code>@RecordName</code>.</p>
+        <p>- Ändere den Record-Wert zu <code>@RecordValue</code>.</p>
+        <p>- Setzee das CloudFlare-Proxy auf <code>Falsch</code>.</p>
+        <p>- Ändere die erste Zahl zu <code>1</code>.</p>
+        <p>- Ändere die zweite Zahl zu <code>0</code>.</p>
+        <p>- Klicke nun auf <kbd>Speichern</kbd>.</p>
+        
+        <button @onclick="() => ShowResult=false">Zurück</button>
+    }
+    else
+    {
+        <p>- Change the record type from <code>A</code> to <code>SRV</code>.</p>
+        <p>- Change the record name to <code>@RecordName</code>.</p>
+        <p>- Change the record value to <code>@RecordValue</code>.</p>
+        <p>- Set the CloudFlare Proxy to <code>False</code>.</p>
+        <p>- Change the first number input to <code>1</code>.</p>
+        <p>- Change the second number input to <code>0</code>.</p>
+        <p>- Now click on <kbd>Save</kbd>.</p>
+    
+        <button @onclick="() => ShowResult=false">Go back</button> 
+    }
+}
+@code {
+
+    Input Model = new Input();
+
+    private string Language = "en";
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    { 
+        if (firstRender) {
+            var browserLanguage = await JS.InvokeAsync<string>("app.getBrowserLanguage");
+            
+
+            Language = browserLanguage.StartsWith("de") ? "de" : "en";
+            
+            StateHasChanged();
+
+        }
+    }
+    
+    private bool ShowResult;
+    private string RecordName = "";
+    private string RecordValue = "";
+
+    private void Callback()
+    {
+        if (Model.ServerUrl == string.Empty || Model.Type == string.Empty)
+            return;
+
+        RecordName = Model.Type;
+
+        var FQDN = Model.ServerUrl.Split(":")[0];
+        
+        var Port = Model.ServerUrl.Split(":")[1];
+
+        RecordValue = "0 " + Port + " " + FQDN;
+        
+        ShowResult = true;
+    }
+
+}
