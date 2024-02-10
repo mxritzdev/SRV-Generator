@@ -43,3 +43,5 @@ Desktop.ini
 storage/
 SRVGenerator/publish.ps1
 SRVGenerator/version
+SRVGenerator/obj
+SRVGenerator/bin
