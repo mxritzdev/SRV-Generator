@@ -2,6 +2,7 @@
 @using SRVGenerator.Models
 @inject IJSRuntime JS
 
+
 <h1>SRV Record Generator</h1>
 <p>made by <a href="https://mxritz.xyz" target="_blank">moritz</a> for <a href="https://endelon.link" target="_blank">endelon</a></p>
 <br/>
@@ -88,13 +89,23 @@ else
 <br>
 <br>
 <nav>
+    
     <span>by <a href="https://mxritz.xyz" target="_blank">moritz</a></span>
+
     <a href="https://github.com/Moritz-Deiaco/SRV-Generator">github</a>
+
+    @if (Language == "de")
+    {
+        <a href="https://endelon.link/imprint" target="_blank">impressum</a>
+    }
+    else
+    {
+        <a href="https://endelon.link/imprint" target="_blank">imprint</a>
+    }
+
 </nav>
 
 @code {
-
-    Input Model = new Input();
 
     private string Language = "en";
     
@@ -110,6 +121,8 @@ else
 
         }
     }
+
+    Input Model = new Input();
     
     private bool ShowResult;
     private string RecordName = "";
