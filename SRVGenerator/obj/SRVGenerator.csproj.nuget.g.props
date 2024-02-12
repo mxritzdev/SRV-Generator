@@ -12,4 +12,8 @@
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <SourceRoot Include="C:\Users\morit\.nuget\packages\" />
   </ItemGroup>
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)toolbelt.blazor.getproperty.script\1.2.0\buildTransitive\Toolbelt.Blazor.GetProperty.Script.props" Condition="Exists('$(NuGetPackageRoot)toolbelt.blazor.getproperty.script\1.2.0\buildTransitive\Toolbelt.Blazor.GetProperty.Script.props')" />
+    <Import Project="$(NuGetPackageRoot)toolbelt.blazor.hotkeys2\3.2.1\buildTransitive\Toolbelt.Blazor.HotKeys2.props" Condition="Exists('$(NuGetPackageRoot)toolbelt.blazor.hotkeys2\3.2.1\buildTransitive\Toolbelt.Blazor.HotKeys2.props')" />
+  </ImportGroup>
 </Project>

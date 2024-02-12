@@ -1,17 +1,25 @@
 ﻿@page "/"
+
 @using SRVGenerator.Models
 @inject IJSRuntime JS
+@implements IDisposable
+@using Toolbelt.Blazor.HotKeys2 
+@using System.Text.RegularExpressions
+@using System.Web
+@using HostingEnvironmentExtensions = Microsoft.Extensions.Hosting.HostingEnvironmentExtensions
+@inject HotKeys HotKeys 
+@inject NavigationManager NavigationManager
 
 
 <h1>SRV Record Generator</h1>
 <p>made by <a href="https://mxritz.xyz" target="_blank">moritz</a> for <a href="https://endelon.link" target="_blank">endelon</a></p>
 <br/>
 
-@if (!ShowResult){
+@if (State == 0){
     
     @if (Language == "de")
     {
-        <p>Du möchtest deinen Minecraft-Server oder Teamspeak-3-Server mit einer Domain verbinden? Folge dieser einfache Anleitung:</p>
+        <p>Du möchtest deinen Minecraft-Server oder Teamspeak-3-Server mit einer Domain verbinden? Folge dieser einfachen Anleitung:</p>
     }
     else
     {
@@ -20,69 +28,75 @@
 
     <EditForm Model="Model" OnSubmit="Callback">
 
-        <InputSelect @bind-Value="Model.Type">
+        <p style="color:#FF5733">@Error</p>
+
+        <InputSelect @bind-Value="Model.Type" required="required">
             
-            @if (Language == "de") {
-                <option value="" selected disabled hidden>
-                    Dienst auswählen
-                </option>
-            }
-            else
-            {
-                <option value="" selected disabled hidden>
-                    Choose Service
-                </option>
-            }
+            
             
             <option value="" selected disabled hidden>
                 @(Language == "de" ? "Dienst auswählen" : "Choose Service")
             </option>
+            
 
+            
             <option value="_minecraft._tcp">Minecraft</option>
 
             <option value="_ts3._udp">Teamspeak</option>
 
         </InputSelect>
 
-        <InputText @bind-Value="Model.ServerUrl" placeholder="Server URL: node1.endelon-hosting.de:1234" pattern="(?:\d{1,3}\.){3}\d{1,3}:\d{1,5}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}:\d{1,5}|[^:]+:\d{1,5}"></InputText>
+        <InputText @bind-Value="Model.ServerIp" required="required" placeholder="Server URL: node1.endelon-hosting.de:1234"></InputText>
 
+        
+        
+        
         @if (Language == "de") {
-            <input type="submit" value="Absenden">
+            <button type="submit">Absenden <kbd>ENTER</kbd></button>
         }
         else
         {
-            <input type="submit" value="Submit">
+            <button type="submit">Submit <kbd>ENTER</kbd></button>
+            
         }
     </EditForm>
+    
 }
-else
+else if (State == 1)
 {
 
     if (Language == "de")
     {
         
     
-        <p>- Ändere den Record-Typ von <code>A</code> zu <code>SRV</code>.</p>
-        <p>- Ändere den Record-Name zu <code>@RecordName</code>.</p>
-        <p>- Ändere den Record-Wert zu <code>@RecordValue</code>.</p>
-        <p>- Setzee das CloudFlare-Proxy auf <code>Falsch</code>.</p>
-        <p>- Ändere die erste Zahl zu <code>1</code>.</p>
-        <p>- Ändere die zweite Zahl zu <code>0</code>.</p>
-        <p>- Klicke nun auf <kbd>Speichern</kbd>.</p>
+        <p>1. Ändere den Record-Typ von <code>A</code> zu <code>SRV</code>.</p>
+        <p>2. Ändere den Record-Name zu <code>@RecordName</code>.</p>
+        <p>3. Ändere den Record-Wert zu <code>@RecordValue</code>.</p>
+        <p>4. Setzee das CloudFlare-Proxy auf <code>Falsch</code>.</p>
+        <p>5. Ändere die erste Zahl zu <code>1</code>.</p>
+        <p>6. Ändere die zweite Zahl zu <code>0</code>.</p>
+        <p>7. Klicke nun auf <kbd>Speichern</kbd>.</p>
         
-        <button @onclick="() => ShowResult=false">Zurück</button>
+        <button @onclick="DontShowResult">Zurück <kbd>esc</kbd></button> <button @onclick="Export">Exportieren</button>
     }
     else
     {
-        <p>- Change the record type from <code>A</code> to <code>SRV</code>.</p>
-        <p>- Change the record name to <code>@RecordName</code>.</p>
-        <p>- Change the record value to <code>@RecordValue</code>.</p>
-        <p>- Set the CloudFlare Proxy to <code>False</code>.</p>
-        <p>- Change the first number input to <code>1</code>.</p>
-        <p>- Change the second number input to <code>0</code>.</p>
-        <p>- Now click on <kbd>Save</kbd>.</p>
+        <p>1. Change the record type from <code>A</code> to <code>SRV</code>.</p>
+        <p>2. Change the record name to <code>@RecordName</code>.</p>
+        <p>3. Change the record value to <code>@RecordValue</code>.</p>
+        <p>4. Set the CloudFlare Proxy to <code>False</code>.</p>
+        <p>5. Change the first number input to <code>1</code>.</p>
+        <p>6. Change the second number input to <code>0</code>.</p>
+        <p>7. Now click on <kbd>Save</kbd>.</p>
     
-        <button @onclick="() => ShowResult=false">Go back</button> 
+        <button @onclick="DontShowResult">Go back <kbd>esc</kbd></button> <button @onclick="Export">Export</button>
+    }
+    <span style="display: block; height: 12px"></span>
+    
+    @if (Exported)
+    {
+        <code>@ExportText</code>
+        <button @onclick="CopyExport">Copy</button>
     }
 }
 <br>
@@ -105,43 +119,214 @@ else
 
 </nav>
 
+
+
 @code {
 
-    private string Language = "en";
+
+    private string Error  = "";
+
+    private readonly string IpPattern = "(?:\\d{1,3}\\.){3}\\d{1,3}:\\d{1,5}|(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}:\\d{1,5}|[^:]+:\\d{1,5}\n";
+
+    private string Language = "";
+
+    private string? Service;
+    private string? Ip;
+
+    private bool Exported = false;
+    private string ExportText  = "";
     
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    { 
-        if (firstRender) {
-            var browserLanguage = await JS.InvokeAsync<string>("app.getBrowserLanguage");
-            
-
-            Language = browserLanguage.StartsWith("de") ? "de" : "en";
-            
-            StateHasChanged();
-
-        }
-    }
-
-    Input Model = new Input();
     
-    private bool ShowResult;
-    private string RecordName = "";
-    private string RecordValue = "";
 
-    private void Callback()
+    protected override Task OnInitializedAsync()
     {
-        if (Model.ServerUrl == string.Empty || Model.Type == string.Empty)
-            return;
+        var uri = NavigationManager.Uri;
+        var uriWithoutHost = uri.Substring(uri.IndexOf('/', 8)); // Remove the host part (e.g., "https://localhost:5001")
+        
+        var queryString = System.Web.HttpUtility.ParseQueryString(new Uri("http://example.com" + uriWithoutHost).Query);
+        
+        Ip = queryString["ip"];
+        Service = queryString["service"];
+        if (!string.IsNullOrEmpty(Service) && string.IsNullOrEmpty(Ip) || !string.IsNullOrEmpty(Ip) && string.IsNullOrEmpty(Service))
+            NavigationManager.NavigateTo("/", true);
+
+        if (string.IsNullOrEmpty(Service) || string.IsNullOrEmpty(Ip)) return base.OnInitializedAsync();
+        switch (Service)
+        {
+            case "mc":
+                Model.Type = "_minecraft._tcp";
+                break;
+            case "minecraft":
+                Model.Type = "_minecraft._tcp";
+                break;
+            case "_minecraft._tcp":
+                Model.Type = "_minecraft._tcp";
+                break;
+            case "ts":
+                Model.Type = "_ts3._udp";
+                break;
+            case "ts3":
+                Model.Type = "_ts3._udp";
+                break;
+            case "teamspeak":
+                Model.Type = "_ts3._udp";
+                break;
+            case "_ts3._udp":
+                Model.Type = "_ts3._udp";
+                break;
+            default:
+                NavigationManager.NavigateTo("/", true);
+                return base.OnInitializedAsync();
+        }
+
+        if (!Regex.IsMatch(Ip, IpPattern))
+        {
+            NavigationManager.NavigateTo("/", true);
+            return base.OnInitializedAsync();
+        }
+
+        Model.ServerIp = Ip;
+
+        State = 1;
 
         RecordName = Model.Type;
 
-        var FQDN = Model.ServerUrl.Split(":")[0];
-        
-        var Port = Model.ServerUrl.Split(":")[1];
+        var FQDN = Model.ServerIp.Split(":")[0];
+
+        var Port = Model.ServerIp.Split(":")[1];
 
         RecordValue = "0 " + Port + " " + FQDN;
+
+        StateHasChanged();
+        return base.OnInitializedAsync();
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var browserLanguage = await JS.InvokeAsync<string>("app.getBrowserLanguage");
+
+
+            Language = browserLanguage.StartsWith("de") ? "de" : "en";
+
+            StateHasChanged();
+        }
+
+    }
+
+    private Input Model = new();
+    
+    
+    private int State;
+    private string RecordName = "";
+    private string RecordValue = "";
+
+    [JSInvokable("JS")]
+    public void DontShowResult()
+    {
+        State = 0;
+    }
+    
+    private void Callback()
+    {
+        try
+        {
+            if (Model.ServerIp == string.Empty || Model.Type == string.Empty)
+                return;
+            if (!Regex.IsMatch(Model.ServerIp, IpPattern))
+            {
+                if (Language == "de")
+                {
+                    Error = "Bitte gib die Serveradresse im richtigem Format an. Bsp.: 'node1.endelon-hosting.de:1234'";
+                }
+                else
+                {
+                    Error = "Please provide the server ip in the right format. ex.: 'node1.endelon-hosting.de:1234'";
+                }
+                StateHasChanged();
+            }
+
+            Error = "";
+                
+            RecordName = Model.Type;
+
+            var FQDN = Model.ServerIp.Split(":")[0];
+
+            var Port = Model.ServerIp.Split(":")[1];
+
+            RecordValue = "0 " + Port + " " + FQDN;
+
+            State = 1;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            if (Language == "de")
+            {
+                Error = "Ein unbekannter Fehler ist aufgetreten, versuche die Seite neu zu laden";
+            }
+            else
+            {
+                Error = "An unknown error occured, please try to reload the page";
+            }
+            StateHasChanged();
+            throw;
+        }
         
-        ShowResult = true;
+        
+    }
+
+    private HotKeysContext? HotKeysContext;
+
+    protected override void OnInitialized()
+    {
+        HotKeysContext = HotKeys.CreateContext()
+            .Add(Code.Escape, DontShowResult, new())
+            .Add(Code.Enter, Callback, new());
+        
+
+    }
+
+    
+
+    public void Dispose()
+    {
+        HotKeysContext?.Dispose();
+    }
+    
+    
+    
+    public void Export()
+    {
+        if (Exported == true)
+        {
+            Exported = false;
+            return;
+        }
+
+        Exported = true;
+        
+        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        parameters.Add("service", Model.Type);
+        parameters.Add("ip", Model.ServerIp);
+        
+        ExportText = NavigationManager.BaseUri + "?" + ToQueryString(parameters);
+    }
+    
+    static string ToQueryString(Dictionary<string, string> parameters)
+    {
+        var queryParameters = parameters
+            .Select(kvp => $"{HttpUtility.UrlEncode(kvp.Key)}={HttpUtility.UrlEncode(kvp.Value)}");
+        
+        return string.Join("&", queryParameters);
+    }
+
+
+    private void CopyExport()
+    {
+        JS.InvokeVoidAsync("app.copyText", ExportText);
     }
 
 }

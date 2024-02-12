@@ -4,6 +4,6 @@ public class Input
 {
     public string Type { get; set; } = "";
     
-    public string ServerUrl { get; set; } = "";
+    public string ServerIp { get; set; } = "";
     
 }
