@@ -6,6 +6,8 @@
         
     </Found>
     <NotFound>
-        <p>Not Found</p>
+        @{
+                    NavigationManager.NavigateTo("/", true);
+        }
     </NotFound>
 </Router>
